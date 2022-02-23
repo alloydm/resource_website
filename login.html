@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/login.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+<div class="container" id="container">
+	<div class="form-container sign-up-container">
+		<form id="signup">
+			<h1>Create Account</h1>
+			<div class="social-container">
+
+                <a href="#" class="fa fa-facebook"></a>
+				<a href="#" class="fa fa-google"></a>
+                <a href="#" class="fa fa-linkedin"></a>
+			</div>
+			<span>or use your email for registration</span>
+			<input type="text" placeholder="Name" />
+			<input type="email" name="email" placeholder="Email" />
+			<input type="password" name="password" placeholder="Password" />
+			<button>Sign Up</button>
+		</form>
+	</div>
+	<div class="form-container sign-in-container">
+		<form id="signin">
+			<h1>Sign in</h1>
+			<div class="social-container">
+
+                <a href="#" class="fa fa-facebook"></a>
+				<a href="#" class="fa fa-google"></a>
+                <a href="#" class="fa fa-linkedin"></a>
+			</div>
+			<span>or use your account</span>
+			<input type="email" name="email" placeholder="Email" />
+			<input type="password" name="password" placeholder="Password" />
+			<a href="#">Forgot your password?</a>
+			<button>Sign In</button>
+		</form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-left">
+				<h1>Welcome Back!</h1>
+				<p>To keep connected with us please login with your personal info</p>
+				<button class="ghost" id="signIn">Sign In</button>
+			</div>
+			<div class="overlay-panel overlay-right">
+				<h1>Hello, Friend!</h1>
+				<p>Enter your personal details and start journey with us</p>
+				<button class="ghost" id="signUp">Sign Up</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script type="text/javascript" src="/js/login.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
+
+<script>
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
+
+var firebaseConfig = {
+apiKey: "AIzaSyC6uYcudOVBVknCnRx-nBE2taOYWDGGweg",
+authDomain: "resource-de762.firebaseapp.com",
+projectId: "resource-de762",
+storageBucket: "resource-de762.appspot.com",
+messagingSenderId: "235365652499",
+appId: "1:235365652499:web:74a2625641d2a760d887e6",
+measurementId: "G-004BP1XE1D"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+// const app1 = initializeApp(firebaseConfig);
+//  const analytics = getAnalytics(app1);
+// const app = initializeApp(firebaseConfig);
+
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
+document.getElementById("signup").addEventListener("submit", (event) =>{
+  event.preventDefault();
+
+
+  const mail = event.target.email.value;
+  const pass = event.target.password.value;
+  firebase.auth().createUserWithEmailAndPassword(mail,pass)
+  .then(({user}) =>
+  {
+    return user.getIdToken().then((idToken)=>{
+      return fetch("/sessionLogin",{
+        method:'POST',
+        headers:{
+          Accept:"application/json",
+          "Content-Type":"application/json",
+          "CSRF-Token":Cookies.get("XSRF-TOKEN"),
+        },
+        body:JSON.stringify({idToken}),
+      });
+    });
+  })
+  .then(()=>{
+    return firebase.auth().signOut();
+  })
+  .then(()=>{
+    window.location.assign("/home");
+  });
+  return false;
+});
+
+document.getElementById("signin").addEventListener("submit", (event) =>{
+  event.preventDefault();
+
+
+  const mail = event.target.email.value;
+  const pass = event.target.password.value;
+  firebase.auth().signInWithEmailAndPassword(mail,pass)
+  .then(({user}) =>
+  {
+    return user.getIdToken().then((idToken)=>{
+      return fetch("/sessionLogin",{
+        method:'POST',
+        headers:{
+          Accept:"application/json",
+          "Content-Type":"application/json",
+          "CSRF-Token":Cookies.get("XSRF-TOKEN"),
+        },
+        body:JSON.stringify({idToken}),
+      });
+    });
+  })
+  .then(()=>{
+    return firebase.auth().signOut();
+  })
+  .then(()=>{
+    window.location.assign("/home");
+  });
+  return false;
+});
+
+</script>
+
+</body>
+</html>
